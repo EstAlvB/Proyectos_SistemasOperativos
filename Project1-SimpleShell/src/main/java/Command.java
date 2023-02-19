@@ -21,7 +21,7 @@ public class Command {
     public String setTask(String operation) {
         if (operation.equals("cd")) {
             if (commandParts.size() < 2) {
-                return "invalid cd command! hint: you need to provide new directory";
+                return "not a valid cd command, try with a new one ";
             }
             String newPath = commandParts.get(1).replaceAll("^\"|\"$", "");
             Path p = Paths.get(newPath);
@@ -34,10 +34,22 @@ public class Command {
             if (newDir.exists() || newDir.isDirectory()) {
                 dir = newDir;
             }
+        }else if (operation.startsWith("ping ")){
+            String text= operation.substring(5);
+            try{
+            Process pingCommand= Runtime.getRuntime().exec("ping "+ text);
+            BufferedReader pingReader= new BufferedReader(new InputStreamReader(pingCommand.getInputStream()));
+            String temp="";
+            while (( temp = pingReader.readLine())!= null){
+                System.out.println(temp);
+            }
+            }catch (java.io.IOException e) {
+            System.out.print(e.getMessage());
+        }        
         }
-        return "";
+        return "";          
     }
-
+    
     public String executeTask() {
         String result = "";
         try {
@@ -67,4 +79,5 @@ public class Command {
     public File getDir() {
         return dir;
     }
+   
 }
