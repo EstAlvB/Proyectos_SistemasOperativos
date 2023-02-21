@@ -18,39 +18,44 @@ public class Command {
         this.dir = dir;
     }
 
-    public String setTask(String operation) {
-        if (operation.equals("cd")) {
-            if (commandParts.size() < 2) {
-                return "not a valid cd command, try with a new one ";
-            }
-            String newPath = commandParts.get(1).replaceAll("^\"|\"$", "");
-            Path p = Paths.get(newPath);
-            File newDir;
-            if (p.isAbsolute())
-                newDir = new File(newPath);
-            else
-                newDir = new File(dir, newPath);
-
-            if (newDir.exists() || newDir.isDirectory()) {
-                dir = newDir;
-            }
-        }else if (operation.startsWith("ping ")){
-            String text= operation.substring(5);
-            try{
-            Process pingCommand= Runtime.getRuntime().exec("ping "+ text);
-            BufferedReader pingReader= new BufferedReader(new InputStreamReader(pingCommand.getInputStream()));
-            String temp="";
-            while (( temp = pingReader.readLine())!= null){
-                System.out.println(temp);
-            }
-            }catch (java.io.IOException e) {
-            System.out.print(e.getMessage());
-        }        
+    public String executeTask(String operation) {
+        String result = "";
+        switch (operation) {
+            case "cd":
+                result = cd();
+                break;
+            case "ls":
+                result = ls();
+                break;
+            case "ping":
+                result = ping();
+                break;
+            case "echo":
+                result = echo();
+                break;
+            default:
+                result = "unknown operation";
+                break;
         }
-        return "";          
+        return result;      
     }
-    
-    public String executeTask() {
+
+    public String cd() {
+        if (commandParts.size() < 2) {
+            return "not a valid cd command, try with a new one";
+        }
+        String newPath = commandParts.get(1).replaceAll("^\"|\"$", "");
+        Path p = Paths.get(newPath);
+        File newDir;
+        if (p.isAbsolute())
+            newDir = new File(newPath);
+        else
+            newDir = new File(dir, newPath);
+
+        if (newDir.exists() || newDir.isDirectory()) {
+            dir = newDir;
+        }
+
         String result = "";
         try {
             pb.directory(dir);
@@ -63,6 +68,45 @@ public class Command {
         } catch (java.io.IOException e) {
             result = e.getMessage();
         }
+        return result;
+    }
+
+    public String ls() {
+        String result = "";
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            result += file.getName() + "\n";
+        }
+        return result;
+    }
+
+    public String ping() {
+        String result = "";
+        String host = commandParts.get(1);
+        try {
+            Process pingCommand = Runtime.getRuntime().exec("ping " + host);
+            BufferedReader pingReader = new BufferedReader(new InputStreamReader(pingCommand.getInputStream()));
+            for (int i = 0; i < 7; i++) {
+                result += pingReader.readLine() + "\n";
+            }
+        } catch (java.io.IOException e) {
+            result = e.getMessage();
+        }
+        return result;
+    }
+
+    public String echo() {
+        String result = "";
+        if (commandParts.size() != 2) {
+            return "not valid echo command, echo receives just one string argument";
+        }
+        result = "Message from echo: " + commandParts.get(1);
+        return result;
+    }
+
+    public String ipconfig() {
+        String result = "";
+        //Falta implementar este comando
         return result;
     }
 
