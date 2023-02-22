@@ -5,7 +5,7 @@ public class History {
     private int n;
 
     public History() {
-        list = new ArrayList<String>(10);
+        list = new ArrayList<String>(20);
         n = 0;
     }
 
@@ -23,19 +23,24 @@ public class History {
     }
 
     public void addCommand(String cmd) {
+        if (n == 20) {
+            list.remove(0);
+        }
         list.add(cmd);
         n++;
     }
 
-    public String lastcommand() {
-        if (!list.isEmpty())
-            return list.get(n - 1);
-        return null;
-    }
-
-    public String get_command(int number) {
-        if (number > 0 && number <= n)
-            return list.get(number - 1);
-        return null;
+    public String getCommand(String str) {
+        String result = "";
+        if (n != 0) {
+            if (str.equals("!#")) {
+                result = list.get(n-1);
+            } else {
+                result = list.get(Character.getNumericValue(str.charAt(1))-1);
+            }
+        } else {
+            result = "no command history available!";
+        }
+        return result;
     }
 }

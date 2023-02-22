@@ -29,6 +29,12 @@ public class SimpleShell {
                 showMessage(commandHistory.getHistory());
                 continue;
             }
+            if (request.startsWith("!") && request.length() == 2) {
+                showMessage(commandHistory.getCommand(request));
+                continue;
+            } else {
+                commandHistory.addCommand(request);
+            }
                 
             Processor p = new Processor(request);
             String operation = p.prepare();
