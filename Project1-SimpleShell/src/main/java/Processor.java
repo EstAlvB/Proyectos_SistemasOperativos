@@ -13,7 +13,6 @@ public class Processor {
     public String prepare() {
         String[] a = commandLine.split(" ");
         for (String str : a) {
-            str = str.replace('-', ' ').trim();
             commandParts.add(str);
         }
         return commandParts.get(0);

@@ -2,8 +2,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class Command {
@@ -32,6 +35,14 @@ public class Command {
                 break;
             case "echo":
                 result = echo();
+                break;
+            case "ipconfig":
+                if (System.getProperty("os.name").startsWith("Windows"))
+                    result = ipconfig();
+                break;
+            case "ifconfig":
+                if (!System.getProperty("os.name").startsWith("Windows"))
+                    result = ipconfig();
                 break;
             default:
                 result = "unknown operation";
@@ -74,8 +85,27 @@ public class Command {
     public String ls() {
         String result = "";
         File[] files = dir.listFiles();
-        for (File file : files) {
-            result += file.getName() + "\n";
+        if (commandParts.size() > 1){
+            if (commandParts.get(1).equals("-l")) {
+                SimpleDateFormat df = new SimpleDateFormat("MMM dd yyyy");
+                try {
+                    BasicFileAttributes atribute;
+                    for (File file : files) {
+                        atribute = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                        String fileData = String.format("%-3s %-3s %6s %-3s %-3s %n", System.getProperty("user.name"),
+                                file.getParentFile().getName(),
+                                (file.isDirectory()) ? "<DIR>" : atribute.size(),
+                                df.format(atribute.lastModifiedTime().toMillis()), file.getName());
+                        result += fileData;
+                    }
+                } catch (java.io.IOException e) {
+                    result = e.getMessage();
+                }
+            }
+        } else {
+            for (File file : files) {
+                result += file.getName() + "\n";
+            }   
         }
         return result;
     }
@@ -106,7 +136,15 @@ public class Command {
 
     public String ipconfig() {
         String result = "";
-        //Falta implementar este comando
+        try {
+            Process ipCommand = Runtime.getRuntime().exec("ipconfig");
+            BufferedReader ipReader = new BufferedReader(new InputStreamReader(ipCommand.getInputStream()));
+            while (ipReader.readLine() != null) {
+                result += ipReader.readLine() + "\n";
+            }
+        } catch (java.io.IOException e) {
+            result = e.getMessage();
+        }
         return result;
     }
 
